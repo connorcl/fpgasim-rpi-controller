@@ -53,13 +53,21 @@ def start_simulation():
     # print message
     draw_text("Starting\nsimulation...")
     # send HTTP request to start remote simulation
-    r = requests.get('http://localhost:5000/start')
+    try:
+        r = requests.get('http://localhost:5000/start')
+    except:
+        draw_text("Connection error!")
+        return
     # check status code
     if r.status_code == 200:
         # get data
         data = r.json()
         # check return code from server
-        if data['code'] != 0:
+        if data['code'] == 1:
+            draw_text("Simulation\nalready started!")
+        elif data['code'] == 2:
+            draw_text("No VHDL file\nuploaded!")
+        elif data['code'] != 0:
             draw_text("Error starting\nsimulation!")
         else:
             # launch simulation locally after short delay
@@ -74,13 +82,19 @@ def stop_simulation():
     # print message
     draw_text("Stopping\nsimulation...")
     # send HTTP request to start remote simulation
-    r = requests.get('http://localhost:5000/stop')
+    try:
+        r = requests.get('http://localhost:5000/stop')
+    except:
+        draw_text("Connection error!")
+        return
     # check status code
     if r.status_code == 200:
         # get data
         data = r.json()
         # check return code from server
-        if data['code'] != 0:
+        if data['code'] == 1:
+            draw_text("Simulation\nnot running!")
+        elif data['code'] != 0:
             draw_text("Error stopping\nsimulation!")
         else:
             # stop simulation locally after short delay
@@ -101,7 +115,8 @@ oled = adafruit_ssd1306.SSD1306_I2C(WIDTH, HEIGHT, i2c, addr=0x3C)
 
 # clear display
 oled.fill(0)
-oled.show()
+# display initial message
+draw_text("Press button to\nstart simulation")
 
 # set button press callback
 button.when_pressed = button_pressed
